@@ -1,0 +1,29 @@
+# ── ESP-IDF 构建产物 ──
+build/
+
+# ── debug/ 下每个子目录都是独立 ESP-IDF 工程：源码入库，产物忽略 ──
+debug/**/build/
+debug/**/sdkconfig
+debug/**/sdkconfig.old
+
+# ── IDF 生成/托管产物 ──
+sdkconfig
+sdkconfig.old
+dependencies.lock
+managed_components/
+
+# ── 词库中间产物：源词表入库，编译出的二进制镜像不入库 ──
+tools/dict_out/
+*.dict.bin
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+
+# ── IDE / 工具 ──
+.claude/
+.vscode/
+
+# ── OS ──
+Thumbs.db
+.DS_Store

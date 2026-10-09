@@ -1,0 +1,15 @@
+## IDF Component Manager Manifest
+##
+## 目前不依赖任何托管组件，所以首次构建不需要联网。
+## 随各里程碑推进要加的依赖（加完记得 idf.py reconfigure）：
+##
+##   lvgl/lvgl: "~9.2"              # 接 UI 时，见 system/uilv/uilv.h
+##   espressif/esp_tinyusb: "~1.4"  # 接 USB HID 时，见 system/hidout/hidout_usb.c
+##                                  # 注意 TinyUSB 不在核心 IDF 里；
+##                                  # components/usb 是 USB Host 栈，不是这个
+##   joltwallet/littlefs: "~1.14"   # 挂 userdict 分区时，见 system/storage/storage.c
+##
+## NimBLE 在核心 IDF 内，不需要在这里声明。
+dependencies:
+  idf:
+    version: ">=5.5.0"

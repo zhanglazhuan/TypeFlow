@@ -1,0 +1,17 @@
+# TypeFlow 分区表 — 16 MB Flash (ESP32-S3 N16R8)
+#
+# 警告：改这个文件会让设备上已有的 userdict 分区偏移变化，用户词库/词频全部丢失。
+# 所以布局在项目第一天就定型，后续只在不得已时改，且必须走 OTA 数据迁移。
+#
+# dict     : 词库镜像。只读，由 tools/dict_build.py 生成，用 esp_partition_mmap 直接当数组查。
+#            不走文件系统 —— 查候选词是热路径，不能有 open/read 开销。
+# userdict : 用户自造词、词频统计。唯一可写的持久化区，littlefs。
+#
+# Name,     Type, SubType,  Offset,   Size,  Flags
+nvs,        data, nvs,      0x9000,   0x6000,
+otadata,    data, ota,      0xf000,   0x2000,
+phy_init,   data, phy,      0x11000,  0x1000,
+ota_0,      app,  ota_0,    0x20000,  3M,
+ota_1,      app,  ota_1,    ,         3M,
+dict,       data, 0x40,     ,         6M,
+userdict,   data, littlefs, ,         1M,

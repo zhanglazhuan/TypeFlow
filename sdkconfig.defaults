@@ -1,0 +1,51 @@
+# TypeFlow sdkconfig.defaults
+# 只放"换台机器重新 clone 也必须这样"的配置；临时调试项别写进来。
+# 改完这个文件后要 `idf.py fullclean` 或删掉 sdkconfig 才会重新生效。
+
+CONFIG_IDF_TARGET="esp32s3"
+
+# ── Flash：N16R8 的 16 MB ────────────────────────────────────────
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+
+# ── PSRAM：R8 是八线(Octal) 8 MB，选错 MODE 会直接跑不起来 ──────
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_TYPE_AUTO=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_USE_MALLOC=y
+# 注意：Octal PSRAM 占用 GPIO33~37，这些脚不可另作他用（见 boards/esp32s3/typeflow_v1.h）
+
+# ── 自定义分区表 ────────────────────────────────────────────────
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# ── 主频与 FreeRTOS ─────────────────────────────────────────────
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_FREERTOS_HZ=1000
+
+# ── 控制台走 UART0 ──────────────────────────────────────────────
+# 关键：不要把控制台放到 USB 上。USB-OTG 外设要留给 TinyUSB 做 HID 键盘，
+# 调试日志从 UART0 (GPIO43/44) 出，两者互不干扰。
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+
+# ── BLE：NimBLE 主机，用于 hidout_ble 后端 ──────────────────────
+# NimBLE 比 Bluedroid 省约 60 KB RAM，且 HID over GATT 够用。
+CONFIG_BT_ENABLED=y
+CONFIG_BT_NIMBLE_ENABLED=y
+
+# ── 日志 ────────────────────────────────────────────────────────
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# ── FATFS ───────────────────────────────────────────────────────────────
+# 本项目不用 FAT 文件系统，但 ESP-IDF 默认会编译 fatfs 组件，而 IDF 5.5.3 的
+# components/fatfs/src/ffconf.h 里 FF_FS_EXFAT 被硬编码为 1，exFAT 又要求必须
+# 开 LFN。于是保持 Kconfig 默认的 FATFS_LFN_NONE 会让 fatfs 编译不过：
+#   ff.c:503: #error LFN must be enabled when enable exFAT
+# 同理 ffconf.h 里 `#define FF_USE_LABEL CONFIG_FATFS_USE_LABEL` 是当「值」用的，
+# 而该 Kconfig 项 default n 时符号根本不会生成，展开成空，C 代码直接语法错。
+# 这两项都只是为了让 fatfs 能编过，本项目运行时不挂载任何 FAT 卷。
+# DeepStoa 的 sdkconfig 也是这么设的（同一个 IDF 版本，同样绕过）。
+CONFIG_FATFS_LFN_HEAP=y
+CONFIG_FATFS_USE_LABEL=y
